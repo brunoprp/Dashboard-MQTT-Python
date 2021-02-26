@@ -52,7 +52,8 @@ while True:
     time.sleep(0.5)
 
     if stop:
-        break
+        df = pd.DataFrame(new_rows2)
+        df.to_csv('out.csv')
 
 # Streamlit widgets automatically run the script from top to bottom. Since
 # this button is not connected to any other logic, it just causes a plain

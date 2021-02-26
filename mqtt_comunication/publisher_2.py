@@ -6,18 +6,18 @@ Created on Thu Feb 25 15:23:39 2021
 @author: bruno
 """
 import paho.mqtt.client as mqtt 
-from pyspectator.processor import Cpu
-from random import randrange, uniform
+from temperature import measureTemp # Temperatura da CPU
 import time
 
-mqttBroker ="192.168.4.62" 
+mqttBroker ="192.168.4.62" # Ip do mqttBroker
 
-client = mqtt.Client("Temperature_PC_Bruno")
-client.connect(mqttBroker) 
+client = mqtt.Client("Temperature_PC_Bruno") # ID do cliente mqtt
+
+client.connect(mqttBroker)  # Se conectando ao Broker
 
 while True:
-    cpu = Cpu(monitoring_latency=1)
-    client.publish("TEMPERATURE", "PC_Bruno: "+str(cpu.temperature))
-    
-    print("Just published " + "PC_Bruno: "+str(cpu.temperature) + " to topic TEMPERATURE")
+    # Publicando a informação no canal TEMPERATURE
+    client.publish("TEMPERATURE", "PC_Bruno: "+str(measureTemp())) 
+    print("Just published " + "PC_Bruno: "+str(measureTemp()) + " to topic TEMPERATURE")
+    # Publicando a cada 1 Segundo
     time.sleep(1)
