@@ -34,7 +34,7 @@
    ```
    * Para acriação dos Dashboards de monitoramneto é usado a biblioteca [streamlit](https://www.streamlit.io/), para a instalação use o comando a baixo.
    ```sh
-   $ pip install streamlit
+   $ sudo pip install streamlit
    ```
  3) Outras bibliotecas usasadas:
   * numpy ```$ pip install numpy ```
