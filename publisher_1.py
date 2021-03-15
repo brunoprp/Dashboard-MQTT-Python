@@ -10,6 +10,8 @@ from temperature import measureTemp # Temperatura da CPU
 import time
 from encoder_base64 import ImgEncodDecod64
 
+
+
 obj_img_base64 = ImgEncodDecod64()
 
 mqttBroker ="sistemas.amsolution.com.br"  #  Ip do mqttBroke port= 1883

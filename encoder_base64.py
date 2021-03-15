@@ -41,7 +41,7 @@ class ImgEncodDecod64():
         byte = file.read() 
         file.close() 
           
-        decodeit = open(file_save+'.jpeg', 'wb') 
+        decodeit = open(file_save+'.jpg', 'wb') 
         decodeit.write(base64.b64decode((byte))) 
         decodeit.close()
         
