@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Chart.js Example</title>
+    <!-- import plugin script -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.0/Chart.bundle.min.js"></script>
+  </head>
+  <body>
+    <h1>Simple Line Chart</h1>
+    <!-- bar chart canvas element -->
+    <!--<canvas id="myChart" width="600" height="400"></canvas> -->
+    <canvas id="chartDonut"></canvas>
+    <p id="caption">The chart is displaying a simple line chart.</p>
+
+    <script>
+      // Global parameters:
+      var ctx = document.getElementById("chartDonut");
+      var myDoughnutChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: {{labels | safe}},
+          datasets: [{
+            data: {{values | safe}},
+            backgroundColor: [
+              "#3e95cd", "#8e5ea2","#3cba9f"
+            ]
+          }]
+        },
+
+          options: {
+                title: {
+                    display: true,
+                    text: 'Doughnut Chart Title'
+                }
+          }
+
+      });
+
+            
+
+    </script>
+
+  </body>
+</html>

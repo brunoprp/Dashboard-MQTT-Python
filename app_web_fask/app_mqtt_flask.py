@@ -10,6 +10,7 @@ from flask import Flask, render_template
 from flask_mqtt import Mqtt
 from flask_socketio import SocketIO
 import time
+from datetime import time as tm
 import os
 from encoder_base64 import ImgEncodDecod64
 
@@ -72,6 +73,47 @@ def handle_mqtt_message(client, userdata, message):
 @mqtt.on_log()
 def handle_logging(client, userdata, level, buf):
     print(level, buf)
+    
+#%%
+## Chartes
+
+@app.route("/chart_donut")
+def chart():
+    
+    labels =['good', 'mediocre','bad']
+    values = [30, 10, 12]
+    
+    
+    return render_template('chart_donut.html', values=values,labels=labels)
+
+
+@app.route("/line_chart")
+def time_chart():
+    legend = 'Temperaturas'
+    temperatures = [73.7, 73.4, 73.8, 72.8, 68.7, 65.2,
+                    61.8, 58.7, 58.2, 58.3, 60.5, 65.7,
+                    70.2, 71.4, 71.2, 70.9, 71.3, 71.1]
+    
+    times = [tm(hour=11, minute=14, second=15),
+             tm(hour=11, minute=14, second=30),
+             tm(hour=11, minute=14, second=45),
+             tm(hour=11, minute=15, second=00),
+             tm(hour=11, minute=15, second=15),
+             tm(hour=11, minute=15, second=30),
+             tm(hour=11, minute=15, second=45),
+             tm(hour=11, minute=16, second=00),
+             tm(hour=11, minute=16, second=15),
+             tm(hour=11, minute=16, second=30),
+             tm(hour=11, minute=16, second=45),
+             tm(hour=11, minute=17, second=00),
+             tm(hour=11, minute=17, second=15),
+             tm(hour=11, minute=17, second=30),
+             tm(hour=11, minute=17, second=45),
+             tm(hour=11, minute=18, second=00),
+             tm(hour=11, minute=18, second=15),
+             tm(hour=11, minute=18, second=30)]
+    return render_template('line_chart.html', values=temperatures, labels=times, legend=legend)
+
 
 #%% Execultado toda a aplicação
 if __name__ == '__main__':
