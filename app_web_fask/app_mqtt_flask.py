@@ -114,6 +114,11 @@ def time_chart():
              tm(hour=11, minute=18, second=30)]
     return render_template('line_chart.html', values=temperatures, labels=times, legend=legend)
 
+@app.route("/dash_chart")
+def dash_teste():
+    
+    return render_template('teste_dash.html')
+
 
 #%% Execultado toda a aplicação
 if __name__ == '__main__':
