@@ -8,6 +8,10 @@ Created on Mon Mar 22 15:06:05 2021
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_mysqldb import MySQL
 import MySQLdb.cursors
+from flask_socketio import SocketIO
+from flask_mqtt import Mqtt
+from encoder_base64 import ImgEncodDecod64
+import time
 import re
 import os
 
@@ -24,6 +28,21 @@ mysql = MySQL(app)
 
 app.secret_key = 'IOT'
 
+
+#%% Instancias
+obj_base64 = ImgEncodDecod64() # Instanciando o objeto da classe ImgEncodDecod64()
+
+# Criando o app flask e configurando a comunicação MQTT
+
+app.config['MQTT_BROKER_URL'] = 'sistemas.amsolution.com.br'
+app.config['MQTT_BROKER_PORT'] = 1883
+app.config['MQTT_REFRESH_TIME'] = 1.0
+
+img_string = '' # Mensagem recebida pelo MQTT
+file_name_img = "image_mqtt" # Nome do arquivo da imagem
+path_img = "static/images/" # Onde a imagem vai ser salva
+mqtt = Mqtt(app) # Instaciando o objeto MQTT com o app Flask
+socketio = SocketIO(app) # Integrando o objeto socketi a aplicação
 
 
 # Configurando diretorio da pasta das imagens
@@ -126,15 +145,52 @@ def register():
     return render_template('register.html', msg=msg)
 
 
+
+    
+#%% Graficos individuais 
+
+
+
+
+
+
+#%% Dados MQTT 
+
+# Subscriber no topico IMAGEM_BASE64
+@mqtt.on_connect()
+def handle_connect(client, userdata, flags, rc):
+    mqtt.subscribe('IMAGEM_BASE64')
+
+
+# Recebendo a mensagem do topico do MQTT
+@mqtt.on_message()
+def handle_mqtt_message(client, userdata, message):
+    global img_string 
+    data = dict(
+        topic=message.topic,
+        payload=message.payload.decode()
+    )
+    # Salvando a mensagem e fazendo o deconder da imagem 
+    img_string = message.payload.decode()
+    obj_base64.saveStringBin(img_string, "arquivos/imagem_bin")
+    time.sleep(5)
+    obj_base64.decoder("arquivos/imagem_bin.bin", path_img+file_name_img)
+    
+   
+# Mostrando informações das mensagen recebidas
+@mqtt.on_log()
+def handle_logging(client, userdata, level, buf):
+    print(level, buf)
+
 #%%
 @app.route('/home')
 def home():
     
     labels_line =  ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sabado", "Domingo"]
     values_line = [37, 39, 30, 29, 26, 31, 40]
-    legend = 'Monthly Data'
-
     
+    
+    legend = 'Monthly Data'
     labels =['good', 'mediocre','bad']
     values = [30, 10, 12]
     
@@ -145,12 +201,15 @@ def home():
     # Check if user is loggedin
     if 'loggedin' in session:
         # User is loggedin show them the home page
-        return render_template('index_2.html', value1= 75 ,value2 = 15 ,
-                           labels=labels, user_image = full_filename, 
-                           labels_line = labels_line, values_line = values_line, 
-                           legend = legend, username=session['username'])
+        return render_template('index_2.html', value1= 75 ,value2 = 15 , labels=labels, 
+                               user_image = full_filename, labels_line = labels_line, 
+                               values_line = values_line, 
+                               legend = legend,username=session['username'])
     # User is not loggedin redirect to login page
     return redirect(url_for('login'))
+
+
+
 
 
 if __name__ == '__main__':
