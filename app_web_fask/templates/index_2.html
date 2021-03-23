@@ -128,7 +128,7 @@
                         <center>
                         <h3>Images MQTT</h3>
                         <p><a href="" class="button">Filter By Employee</a></p>
-                        <img src="{{ user_image }}" alt="User Image"  width="300" height="400"> 
+                        <img id="img_mqtt" src="{{ user_image }}" alt="User Image"  width="300" height="400"> 
                         </center> 
 
                    </div>
@@ -351,6 +351,46 @@
 
         </script>
 
+
+      	<script src="http://code.jquery.com/jquery-3.1.1.js"></script>
+		<script type="text/javascript">
+		    //function doRefresh(){
+		        //$("#img_mqtt").load(" #img_mqtt");
+		    //}
+		    //$(function() {
+		        //setInterval(doRefresh, 5000);
+		    //});
+		</script>
+
+ <!-- Atualização da imagem automaticamente -->
+		<script type="text/javascript">
+			
+			function refresh(node)
+			{
+			   var times = 3000; // gap in Milli Seconds;
+
+			   (function startRefresh()
+			   {
+			      var address;
+			      if(node.src.indexOf('?')>-1)
+			       address = node.src.split('?')[0];
+			      else 
+			       address = node.src;
+			      node.src = address+"?time="+new Date().getTime();
+
+			      setTimeout(startRefresh,times);
+			   })();
+
+			}
+
+			window.onload = function()
+			{
+			  var node = document.getElementById('img_mqtt');
+			  refresh(node);
+			  // you can refresh as many images you want just repeat above steps
+			}
+
+		</script>
 
     </body>
 </html>
