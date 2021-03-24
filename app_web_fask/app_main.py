@@ -32,13 +32,14 @@ app.secret_key = 'IOT'
 #%% Instancias
 obj_base64 = ImgEncodDecod64() # Instanciando o objeto da classe ImgEncodDecod64()
 
-# Criando o app flask e configurando a comunicação MQTT
-
+#  Configurando a comunicação MQT
 app.config['MQTT_BROKER_URL'] = 'sistemas.amsolution.com.br'
 app.config['MQTT_BROKER_PORT'] = 1883
 app.config['MQTT_REFRESH_TIME'] = 1.0
 
-img_string = '' # Mensagem recebida pelo MQTT
+img_string = '' # Mensagem recebida pelo MQTT (Imagem em base64)
+valor_temp1 = '50'
+
 file_name_img = "image_mqtt" # Nome do arquivo da imagem
 path_img = "static/images/" # Onde a imagem vai ser salva
 mqtt = Mqtt(app) # Instaciando o objeto MQTT com o app Flask
@@ -48,6 +49,8 @@ socketio = SocketIO(app) # Integrando o objeto socketi a aplicação
 # Configurando diretorio da pasta das imagens
 img_folder = os.path.join('static', 'images')
 app.config['UPLOAD_FOLDER'] = img_folder
+
+folder_temp = "arquivos/temperatura.txt"
 
 
 #%% Controle de cache (Limpa a cahe do navegador)
@@ -59,7 +62,8 @@ def add_header(response):
 
 
 
-#%%
+#%% Pagina de longin
+
 @app.route('/', methods=['GET', 'POST'])
 def login():
     # Output message if something goes wrong...
@@ -94,9 +98,8 @@ def login():
     
     return render_template('login.html', msg=msg)
 
-#%%
+#%% Faz o ação do logout para deslogar o usuario
 
-# http://localhost:5000/python/logout - this will be the logout page
 @app.route('/logout')
 def logout():
     # Remove session data, this will log the user out
@@ -107,7 +110,7 @@ def logout():
    return redirect(url_for('login'))
 
 
-#%%
+#%% Registro de usuario no banco de dados
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     # Output message if something goes wrong...
@@ -160,21 +163,35 @@ def register():
 @mqtt.on_connect()
 def handle_connect(client, userdata, flags, rc):
     mqtt.subscribe('IMAGEM_BASE64')
+    mqtt.subscribe('temperatura')
 
 
 # Recebendo a mensagem do topico do MQTT
 @mqtt.on_message()
 def handle_mqtt_message(client, userdata, message):
     global img_string 
+    global valor_temp1
+    
     data = dict(
         topic=message.topic,
         payload=message.payload.decode()
     )
-    # Salvando a mensagem e fazendo o deconder da imagem 
-    img_string = message.payload.decode()
-    obj_base64.saveStringBin(img_string, "arquivos/imagem_bin")
-    time.sleep(5)
-    obj_base64.decoder("arquivos/imagem_bin.bin", path_img+file_name_img)
+    
+    if message.topic == "temperatura":
+        valor_temp1 = message.payload.decode()
+        
+        # Salvando a temperatura em um aquivo de texto
+        text_file = open(folder_temp, "w")
+        text_file.write(valor_temp1)
+        text_file.close()
+        
+        # quando for imagem em IMAGEM_BASE64
+    else:
+        # Salvando a mensagem e fazendo o deconder da imagem 
+        img_string = message.payload.decode()
+        obj_base64.saveStringBin(img_string, "arquivos/imagem_bin")
+        time.sleep(5)
+        obj_base64.decoder("arquivos/imagem_bin.bin", path_img+file_name_img)
     
    
 # Mostrando informações das mensagen recebidas
@@ -185,32 +202,37 @@ def handle_logging(client, userdata, level, buf):
 #%%
 @app.route('/home')
 def home():
-    
+    # Valores grafico de linha do rodapé
     labels_line =  ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sabado", "Domingo"]
     values_line = [37, 39, 30, 29, 26, 31, 40]
     
+    #Lendo dos valores de temperatura salvos no aquivo txt
+    temp = open(folder_temp, "r")
+    valor_temp1 = temp.read()
+    valor_temp2 = 100-float(valor_temp1) 
+    temp.close()
     
-    legend = 'Monthly Data'
-    labels =['good', 'mediocre','bad']
-    values = [30, 10, 12]
-    
+
+    # Caminho da imagem recebida via MQTT
     full_filename = os.path.join(app.config['UPLOAD_FOLDER'], 'image_mqtt.jpeg')
     
     
     
-    # Check if user is loggedin
+    # Verfica se o usuario esta logado para poder acessar o index com os graficos
     if 'loggedin' in session:
-        # User is loggedin show them the home page
-        return render_template('index_2.html', value1= 75 ,value2 = 15 , labels=labels, 
+        
+        # usuario logado redireciona para a pagina home com os graficos
+        return render_template('index.html', valor_temp1 = int(valor_temp1) , 
+                               valor_temp2 = valor_temp2 ,
                                user_image = full_filename, labels_line = labels_line, 
-                               values_line = values_line, 
-                               legend = legend,username=session['username'])
-    # User is not loggedin redirect to login page
+                               values_line = values_line,username=session['username'])
+    
+    # usuario não logado redireciona para a pagina de login
     return redirect(url_for('login'))
 
 
 
 
-
+# Execulta o app web
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

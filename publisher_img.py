@@ -27,6 +27,8 @@ while True:
     string_img = obj_img_base64.encoder("images/"+list_imgs[index_img], 'imagem_bin')
     
     client.publish("IMAGEM_BASE64", string_img)
+    
+    client.publish("temperatura", str(90))
     print("Just published ")
     # Publicando a cada 1 Segundo
     time.sleep(1)
