@@ -24,11 +24,12 @@ client.connect(mqttBroker, port=1883) # Se conectando ao Broker
 
 while True: 
     index_img = randrange(0, 5)
+    temperatura = randrange(20, 50)
     string_img = obj_img_base64.encoder("images/"+list_imgs[index_img], 'imagem_bin')
     
     client.publish("IMAGEM_BASE64", string_img)
     
-    client.publish("temperatura", str(90))
+    client.publish("temperatura", str(temperatura)+"_25/03/2021_13:59:20")
     print("Just published ")
     # Publicando a cada 1 Segundo
     time.sleep(1)

@@ -177,6 +177,7 @@ def handle_mqtt_message(client, userdata, message):
         payload=message.payload.decode()
     )
     
+    # Verificando de qual topico é a mensagem recebida
     if message.topic == "temperatura":
         valor_temp1 = message.payload.decode()
         
@@ -199,18 +200,31 @@ def handle_mqtt_message(client, userdata, message):
 def handle_logging(client, userdata, level, buf):
     print(level, buf)
 
+
 #%%
 @app.route('/home')
-def home():
+def main():
     # Valores grafico de linha do rodapé
     labels_line =  ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sabado", "Domingo"]
     values_line = [37, 39, 30, 29, 26, 31, 40]
     
     #Lendo dos valores de temperatura salvos no aquivo txt
     temp = open(folder_temp, "r")
-    valor_temp1 = temp.read()
-    valor_temp2 = 100-float(valor_temp1) 
+    dados_temp1 = str(temp.read())
     temp.close()
+    dados_temp1 = dados_temp1.split("_")
+    valor_temp1 = dados_temp1[0]
+    data_temp = dados_temp1[1]
+    horo_temp = dados_temp1[2]
+    valor_temp2 = 100-float(valor_temp1) 
+    
+    
+    
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute('INSERT INTO temperatura VALUES (NULL, %s, %s, %s)', 
+                   (valor_temp1, data_temp, horo_temp,))
+    mysql.connection.commit()
+    
     
 
     # Caminho da imagem recebida via MQTT

@@ -103,7 +103,7 @@
 
 
                  <!-- Grafico de Temperatura -->
-                  <div class="third widget doughnut">
+                  <div class="third widget doughnut" id="temp_div">
                         <h3>Temperatura</h3>
                         <p><a href="" class="button">Filter By Employee</a></p>
                         <div class="canvas-container">
@@ -112,7 +112,7 @@
                         </div>
                         <div class="chart-legend">
                             <ul>
-                                <li class="temp">  Temperatura graus celsius </li>
+                                <li class="temp"> {{valor_temp1}} graus,  Temperatura graus celsius </li>
                                  
                             </ul>
                         </div>
@@ -311,11 +311,19 @@
                     
 
                 ];
-                
+
 
                 var canvas = document.getElementById("temperatura");
                 var ctx = canvas.getContext("2d");
-                new Chart(ctx).Doughnut(data, options);
+                var chart = new Chart(ctx).Doughnut(data, options);
+
+            
+
+
+               
+                
+                
+
 
 
 
@@ -353,14 +361,6 @@
 
 <!-- Atualização da Divs automaticamente -->
       	<script src="http://code.jquery.com/jquery-3.1.1.js"></script>
-		<script type="text/javascript">
-		    //function doRefresh(){
-		        //$("#img_mqtt").load(" #img_mqtt");
-		    //}
-		    //$(function() {
-		        //setInterval(doRefresh, 5000);
-		    //});
-		</script>
 
  <!-- Atualização da imagem automaticamente -->
 		<script type="text/javascript">
